@@ -1,0 +1,12 @@
+{
+  "name": "labs-1",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "echo \"Error: start script not specified\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
