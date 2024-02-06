@@ -30,4 +30,15 @@
 
 Ref: https://nodejs.org/dist/latest-v20.x/docs/api/url.html#urlparseurlstring-parsequerystring-slashesdenotehost
 
+- `express-generator` generates the barebone structure of  an express application
+- The difference between the function passed to `http.createServer` & `app.use` is that function used in the latter can also have a third parameter called **next** which is an error callback function that is called when the function passed to `app.use` has completed any tasks and is ready to handover to the subsequent function via **app.use**. 
+- `res.send`  is a method added by express that will detect the **Content-Type** from the input, and perform other additional operations which is used in place of `res.end`
+
+
+
+**`npx nsd-check`** -  to check the essential requirements for express app (for e.g. server listens on the port specified on environment file)
+
+
+
+`fastify.setNotFoundHandler((request, response) => {})`
 
