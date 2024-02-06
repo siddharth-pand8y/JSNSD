@@ -2,10 +2,15 @@
 
 const express = require("express");
 const createError = require("http-errors");
+const indexRoute = require('./routes/index');
+const helloRoute = require('./routes/hello');
 
 const app = express();
 
 module.exports = app;
+
+app.use('/', indexRoute);
+app.use('/hello', helloRoute);
 
 app.use((req, res, next) => {
   if (req.method !== "GET") {
