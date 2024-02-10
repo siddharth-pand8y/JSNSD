@@ -1,0 +1,26 @@
+{
+  "name": "01",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "fastify start -l info app.js",
+    "dev": "fastify start -l -w info -P app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/autoload": "^5.8.0",
+    "@fastify/sensible": "^5.5.0",
+    "@fastify/view": "^8.2.0",
+    "fastify": "^4.26.0",
+    "fastify-cli": "^6.1.0",
+    "handlebars": "^4.7.8",
+    "hn-latest-stream": "^1.0.2"
+  },
+  "devDependencies": {
+    "tap": "^18.7.0"
+  }
+}
