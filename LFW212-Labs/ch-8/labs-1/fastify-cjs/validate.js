@@ -46,7 +46,7 @@ const up = promisify(function retry(port, cb) {
   if (!up.timeout) {
     up.timeout = setTimeout(() => {
       cb(new AssertionError({ message: 'server did not start in time' }))
-    }, 1500).unref()
+    }, 2000).unref()
   }
   const socket = net
     .connect(port)

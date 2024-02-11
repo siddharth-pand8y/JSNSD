@@ -1,0 +1,30 @@
+{
+  "name": "labs-1",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "tap \"test/**/*.test.js\"",
+    "start": "fastify start -l info app.js",
+    "dev": "fastify start -w -l info -P app.js",
+    "pretest": "standard",
+    "lint": "standard --fix"
+  },
+  "keywords": [],
+  "license": "UNLICENSED",
+  "description": "This project was bootstrapped with Fastify-CLI.",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "author": "",
+  "dependencies": {
+    "@fastify/autoload": "^5.0.0",
+    "@fastify/sensible": "^5.0.0",
+    "fastify": "^4.0.0",
+    "fastify-cli": "^5.9.0",
+    "fastify-plugin": "^4.0.0"
+  },
+  "devDependencies": {
+    "standard": "^17.0.0",
+    "tap": "^16.1.0"
+  }
+}
