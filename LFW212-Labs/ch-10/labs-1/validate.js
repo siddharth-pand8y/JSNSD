@@ -6,14 +6,18 @@ const net = require('net')
 const assert = require('assert').strict
 const { AssertionError } = require('assert')
 const { mkdtempSync, writeFileSync } = require('fs')
-const { tmpdir }  = require('os')
+const { tmpdir } = require('os')
 const { join } = require('path')
 const tmp = mkdtempSync(join(tmpdir(), 'ch-10-labs-1'))
 const preload = join(tmp, 'preload.js')
-const ip = process.platform === 'win32' ? join(tmp, 'ip').split('\\').join('\\\\') : join(tmp, 'ip')
+const ip =
+  process.platform === 'win32'
+    ? join(tmp, 'ip').split('\\').join('\\\\')
+    : join(tmp, 'ip')
 writeFileSync(ip, '')
 writeFileSync(
-  preload, `
+  preload,
+  `
     const fs = require('fs')
     const net = require('net')
     const proto = net.Socket.prototype
@@ -35,21 +39,24 @@ writeFileSync(
 
 const timeout = promisify(setTimeout)
 const get = promisify((url, cb) => {
-  const req = http.get(url, (res) => {
-    cb(null, res)
-  }).once('error', (err) => {
-    cb(err)
-  }).once('timeout', () => {
-    const err = Error('timeout')
-    err.code = 'EREQTIMEOUT'
-    err.url = url
-    err.method = 'GET'
-    cb(err)
-  })
+  const req = http
+    .get(url, (res) => {
+      cb(null, res)
+    })
+    .once('error', (err) => {
+      cb(err)
+    })
+    .once('timeout', () => {
+      const err = Error('timeout')
+      err.code = 'EREQTIMEOUT'
+      err.url = url
+      err.method = 'GET'
+      cb(err)
+    })
   req.setTimeout(1500)
 })
 
-const getPort = promisify(function retry (port, cb) {
+const getPort = promisify(function retry(port, cb) {
   const server = net.createServer()
   server.listen(port, () => {
     server.once('close', () => cb(null, port))
@@ -58,14 +65,16 @@ const getPort = promisify(function retry (port, cb) {
   server.on('error', () => retry(port + 1, cb))
 })
 
-const up = promisify(function retry (port, cb) {
+const up = promisify(function retry(port, cb) {
   if (!up.timeout) {
     up.timeout = setTimeout(() => {
-      cb(new AssertionError({message: 'server did not start in time'}))
+      cb(new AssertionError({ message: 'server did not start in time' }))
     }, 1500).unref()
   }
-  const socket = net.connect(port).unref()
-    .once('error', () => (setTimeout(retry, 300, port, cb).unref()))
+  const socket = net
+    .connect(port)
+    .unref()
+    .once('error', () => setTimeout(retry, 300, port, cb).unref())
     .once('connect', () => {
       clearTimeout(up.timeout)
       socket.end()
@@ -73,26 +82,30 @@ const up = promisify(function retry (port, cb) {
     })
 })
 
-async function system (p1 = 3000) {
+async function system(p1 = 3000) {
   const PORT = await getPort(p1)
-  const app = spawn(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['start'], {
-    cwd: __dirname,
-    stdio: 'inherit',
-    env: { ...process.env, PORT, NODE_OPTIONS: `-r ${preload}` }
-  })
-  function close () {
+  const app = spawn(
+    process.platform === 'win32' ? 'npm.cmd' : 'npm',
+    ['start'],
+    {
+      cwd: __dirname,
+      stdio: 'inherit',
+      env: { ...process.env, PORT, NODE_OPTIONS: `-r ${preload}` },
+    }
+  )
+  function close() {
     app.kill()
   }
-  try { 
+  try {
     await up(PORT)
     return { port: PORT, app, close }
-  } catch (err) { 
+  } catch (err) {
     close()
     throw err
   }
 }
 
-async function start () {
+async function start() {
   try {
     var sys = await system()
     await validate(sys)
@@ -105,7 +118,7 @@ async function start () {
   }
 }
 
-async function validate ({ port, app }, retries = 0) {
+async function validate({ port, app }, retries = 0) {
   let done = false
   let passed = false
   try {
@@ -129,7 +142,7 @@ async function validate ({ port, app }, retries = 0) {
   }
 }
 
-async function t (validator) {
+async function t(validator) {
   try {
     await validator
   } catch (err) {
@@ -141,20 +154,16 @@ async function t (validator) {
   }
 }
 
-async function ok (port) {
+async function ok(port) {
   const url = `http://localhost:${port}/`
   const res = await get(url)
-  assert.equal(
-    res.statusCode,
-    200,
-    `GET ${url} must respond 200`
-  )
+  assert.equal(res.statusCode, 200, `GET ${url} must respond 200`)
   console.log(`☑️  GET ${url} responded with 200 response`)
 }
 
-async function attack (port) {
+async function attack(port) {
   writeFileSync(ip, '111.34.55.211')
-  try { 
+  try {
     const url = `http://localhost:${port}/`
     const res = await get(url)
     assert.equal(
@@ -162,7 +171,9 @@ async function attack (port) {
       403,
       `GET ${url} must respond 403 when requested from attacker IP`
     )
-    console.log(`☑️  GET ${url} responded with 403 when requested from attacker IP`)
+    console.log(
+      `☑️  GET ${url} responded with 403 when requested from attacker IP`
+    )
   } finally {
     writeFileSync(ip, '')
   }

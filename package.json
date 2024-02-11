@@ -1,0 +1,17 @@
+{
+  "name": "jsnsd",
+  "version": "1.0.0",
+  "description": "## Syllabus",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "prettier": "^3.2.5"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --config .prettierrc . --write"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

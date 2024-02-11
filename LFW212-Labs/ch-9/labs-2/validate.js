@@ -13,35 +13,44 @@ const DATA_500 = randomBytes(2).toString('hex')
 
 const timeout = promisify(setTimeout)
 const get = promisify((url, cb) => {
-  const req = http.get(url, (res) => {
-    cb(null, res)
-  }).once('error', (err) => {
-    cb(err)
-  }).once('timeout', () => {
-    const err = Error('timeout')
-    err.code = 'EREQTIMEOUT'
-    err.url = url
-    err.method = 'GET'
-    cb(err)
-  })
+  const req = http
+    .get(url, (res) => {
+      cb(null, res)
+    })
+    .once('error', (err) => {
+      cb(err)
+    })
+    .once('timeout', () => {
+      const err = Error('timeout')
+      err.code = 'EREQTIMEOUT'
+      err.url = url
+      err.method = 'GET'
+      cb(err)
+    })
   req.setTimeout(1500)
 })
 const send = (url, { method = 'post' } = {}) => {
-  const req = http.request(url, { method, headers: { 'content-type': 'application/json' } })
+  const req = http.request(url, {
+    method,
+    headers: { 'content-type': 'application/json' },
+  })
   req.setTimeout(1500)
-  return (data) => (promisify((data, cb) => {
-    req
-      .once('error', cb)
-      .once('response', (res) => { cb(null, res) })
-      .once('timeout', () => {
-        const err = Error('timeout')
-        err.code = 'EREQTIMEOUT'
-        err.url = url
-        err.method = method.toUpperCase()
-        cb(err)
-      })
-      .end(JSON.stringify(data))
-  })(data))
+  return (data) =>
+    promisify((data, cb) => {
+      req
+        .once('error', cb)
+        .once('response', (res) => {
+          cb(null, res)
+        })
+        .once('timeout', () => {
+          const err = Error('timeout')
+          err.code = 'EREQTIMEOUT'
+          err.url = url
+          err.method = method.toUpperCase()
+          cb(err)
+        })
+        .end(JSON.stringify(data))
+    })(data)
 }
 const body = async (res) => {
   const chunks = []
@@ -49,14 +58,21 @@ const body = async (res) => {
   return Buffer.concat(chunks).toString()
 }
 
-async function start () {
+async function start() {
   const server = net.createServer().listen()
   await once(server, 'listening')
   const { port } = server.address()
   server.close()
   await once(server, 'close')
   await writeFile(join(__dirname, 'model.js'), testingModel())
-  const sp = spawn(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['start'], { env: { ...process.env, PORT: port }, stdio: ['ignore', 'ignore', 'inherit'] })
+  const sp = spawn(
+    process.platform === 'win32' ? 'npm.cmd' : 'npm',
+    ['start'],
+    {
+      env: { ...process.env, PORT: port },
+      stdio: ['ignore', 'ignore', 'inherit'],
+    }
+  )
 
   try {
     await validate({ port })
@@ -72,7 +88,7 @@ async function start () {
   }
 }
 
-async function validate ({ port }, retries = 0) {
+async function validate({ port }, retries = 0) {
   let done = false
   let passed = false
   try {
@@ -99,7 +115,7 @@ async function validate ({ port }, retries = 0) {
   }
 }
 
-async function t (validator) {
+async function t(validator) {
   try {
     await validator
   } catch (err) {
@@ -111,15 +127,11 @@ async function t (validator) {
   }
 }
 
-async function ok (port, id = 1, expect = { brand: 'Chaparral', color: 'red' }) {
+async function ok(port, id = 1, expect = { brand: 'Chaparral', color: 'red' }) {
   const url = `http://localhost:${port}/boat/${id}`
   const res = await get(url)
 
-  assert.equal(
-    res.statusCode,
-    200,
-    `GET ${url} must respond with 200 response`
-  )
+  assert.equal(res.statusCode, 200, `GET ${url} must respond with 200 response`)
   console.log(`☑️  GET ${url} responded with 200 response`)
 
   assert.match(
@@ -133,18 +145,25 @@ async function ok (port, id = 1, expect = { brand: 'Chaparral', color: 'red' }) 
   const content = await body(res)
   try {
     const result = JSON.parse(content)
-    assert.deepEqual(result, expect, `GET ${url} must respond with correct data\n   got -  ${content})`)
+    assert.deepEqual(
+      result,
+      expect,
+      `GET ${url} must respond with correct data\n   got -  ${content})`
+    )
     console.log(`☑️  GET ${url} responded with correct data`)
   } catch (err) {
-    if (err instanceof SyntaxError) assert.fail(`GET ${url} response not parsable JSON`)
+    if (err instanceof SyntaxError)
+      assert.fail(`GET ${url} response not parsable JSON`)
     else throw err
   }
 }
 
-async function created (port) {
+async function created(port) {
   const url = `http://localhost:${port}/boat`
   const tx = send(url)
-  const payload = { data: { brand: 'test', color: 'test', extra: 'should be stripped' } }
+  const payload = {
+    data: { brand: 'test', color: 'test', extra: 'should be stripped' },
+  }
   const res = await tx(payload)
 
   assert.equal(
@@ -165,17 +184,22 @@ async function created (port) {
   const content = await body(res)
   try {
     const result = JSON.parse(content)
-    assert.deepEqual(result, { id: '3' }, `POST ${url} must respond with correct data\n   got -  ${content})`)
+    assert.deepEqual(
+      result,
+      { id: '3' },
+      `POST ${url} must respond with correct data\n   got -  ${content})`
+    )
     console.log(`☑️  POST ${url} responded with correct data`)
   } catch (err) {
-    if (err instanceof SyntaxError) assert.fail(`POST ${url} response not parsable JSON`)
+    if (err instanceof SyntaxError)
+      assert.fail(`POST ${url} response not parsable JSON`)
     else throw err
   }
 
   await ok(port, 3, { brand: 'test', color: 'test' })
 }
 
-async function badRequest (port, payload) {
+async function badRequest(port, payload) {
   const url = `http://localhost:${port}/boat`
   const tx = send(url)
   const res = await tx(payload)
@@ -188,7 +212,7 @@ async function badRequest (port, payload) {
   console.log(`☑️  POST ${url} responded with a 400 response`)
 }
 
-async function serverError (port) {
+async function serverError(port) {
   const url = `http://localhost:${port}/boat`
   const tx = send(url)
   const payload = { data: { brand: DATA_500, color: 'test' } }
@@ -204,7 +228,7 @@ async function serverError (port) {
 
 start().catch(console.error)
 
-function model () {
+function model() {
   return `'use strict'
 
   module.exports = {
@@ -279,7 +303,7 @@ function model () {
     
 `
 }
-function testingModel () {
+function testingModel() {
   return `'use strict'
 
   module.exports = {

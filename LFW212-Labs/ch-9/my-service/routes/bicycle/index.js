@@ -15,9 +15,9 @@ module.exports = async (fastify, opts) => {
     required: ['brand', 'color'],
     additionalProperties: false,
     properties: {
-      brand: {type: 'string'},
-      color: {type: 'string'}
-    }
+      brand: { type: 'string' },
+      color: { type: 'string' },
+    },
   }
 
   const bodySchema = {
@@ -25,99 +25,119 @@ module.exports = async (fastify, opts) => {
     required: ['data'],
     additionalProperties: false,
     properties: {
-      data: dataSchema
-    }
+      data: dataSchema,
+    },
   }
 
   const idSchema = { type: 'integer' }
 
   const paramsSchema = { id: idSchema }
 
-  fastify.post('/', {
-    schema: {
-      body: bodySchema,
-      response: {
-        201: {
-          id: idSchema
-        }
-      }
-    }
-  }, async (request, reply) => {
-    const { data } = request.body
-    const id = uid()
-    await create(id, data)
-    reply.code(201)
-    return { id }
-  })
-
-  fastify.post('/:id/update', {
-    schema: {
-      body: bodySchema,
-      params: paramsSchema
-    }
-  }, async (request, reply) => {
-    const { id } = request.params
-    const { data } = request.body
-    try { 
-      await update(id, data)
-      reply.code(204)
-    } catch (err) { 
-      if (err.message === 'not found') throw notFound()
-      throw err
-    }
-  })
-
-  fastify.get('/:id', {
-    schema: {
-      params: paramsSchema,
-      response: {
-        200: dataSchema
-      }
-    }
-  }, async (request, reply) => {
-    const { id } = request.params
-    try { 
-      return await read(id)
-    } catch (err) { 
-      if (err.message === 'not found') throw notFound()
-      throw err
-    }
-  })
-
-  fastify.put('/:id', {
-    schema: {
-      body: bodySchema,
-      params: paramsSchema
-    }
-  }, async (request, reply) => {
-    const { id } = request.params
-    const { data } = request.body
-    try {
+  fastify.post(
+    '/',
+    {
+      schema: {
+        body: bodySchema,
+        response: {
+          201: {
+            id: idSchema,
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { data } = request.body
+      const id = uid()
       await create(id, data)
       reply.code(201)
-      return { }
-    } catch (err) {
-      if (err.message === 'resource exists') {
+      return { id }
+    }
+  )
+
+  fastify.post(
+    '/:id/update',
+    {
+      schema: {
+        body: bodySchema,
+        params: paramsSchema,
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params
+      const { data } = request.body
+      try {
         await update(id, data)
         reply.code(204)
-      } else { 
+      } catch (err) {
+        if (err.message === 'not found') throw notFound()
         throw err
       }
     }
-  })
+  )
 
-  fastify.delete('/:id', {
-    schema: {
-      params: paramsSchema
+  fastify.get(
+    '/:id',
+    {
+      schema: {
+        params: paramsSchema,
+        response: {
+          200: dataSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params
+      try {
+        return await read(id)
+      } catch (err) {
+        if (err.message === 'not found') throw notFound()
+        throw err
+      }
     }
-  }, async (request, reply) => {
-    const { id } = request.params
-    try {
-      await del(id)
-      reply.code(204)
-    } catch (err) {
-      if (err.message === 'not found') throw notFound()
-      throw err
+  )
+
+  fastify.put(
+    '/:id',
+    {
+      schema: {
+        body: bodySchema,
+        params: paramsSchema,
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params
+      const { data } = request.body
+      try {
+        await create(id, data)
+        reply.code(201)
+        return {}
+      } catch (err) {
+        if (err.message === 'resource exists') {
+          await update(id, data)
+          reply.code(204)
+        } else {
+          throw err
+        }
+      }
     }
-  })
+  )
+
+  fastify.delete(
+    '/:id',
+    {
+      schema: {
+        params: paramsSchema,
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params
+      try {
+        await del(id)
+        reply.code(204)
+      } catch (err) {
+        if (err.message === 'not found') throw notFound()
+        throw err
+      }
+    }
+  )
 }

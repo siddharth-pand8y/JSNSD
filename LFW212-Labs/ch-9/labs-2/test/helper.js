@@ -9,12 +9,12 @@ const App = require('../app')
 
 // Fill in this config with all the configurations
 // needed for testing the application
-function config () {
+function config() {
   return {}
 }
 
 // automatically build and tear down our instance
-function build (t) {
+function build(t) {
   const app = Fastify()
 
   // fastify-plugin ensures that all decorators
@@ -30,5 +30,5 @@ function build (t) {
 
 module.exports = {
   config,
-  build
+  build,
 }

@@ -1,28 +1,36 @@
 'use strict'
 
 module.exports = {
-  bicycle: bicycleModel()
+  bicycle: bicycleModel(),
 }
 
-function bicycleModel () {
+function bicycleModel() {
   const db = {
     1: { brand: 'Veloretti', color: 'green' },
-    2: { brand: 'Batavus', color: 'yellow' }
+    2: { brand: 'Batavus', color: 'yellow' },
   }
 
   return {
-    create, read, update, del, uid
+    create,
+    read,
+    update,
+    del,
+    uid,
   }
 
-  function uid () {
-    return Object.keys(db)
-      .sort((a, b) => a - b)
-      .map(Number)
-      .filter((n) => !isNaN(n))
-      .pop() + 1 + ''
+  function uid() {
+    return (
+      Object.keys(db)
+        .sort((a, b) => a - b)
+        .map(Number)
+        .filter((n) => !isNaN(n))
+        .pop() +
+      1 +
+      ''
+    )
   }
 
-  function create (id, data, cb) {
+  function create(id, data, cb) {
     if (db.hasOwnProperty(id)) {
       const err = Error('resource exists')
       setImmediate(() => cb(err))
@@ -32,8 +40,8 @@ function bicycleModel () {
     setImmediate(() => cb(null, id))
   }
 
-  function read (id, cb) {
-    if (!(db.hasOwnProperty(id))) {
+  function read(id, cb) {
+    if (!db.hasOwnProperty(id)) {
       const err = Error('not found')
       setImmediate(() => cb(err))
       return
@@ -41,8 +49,8 @@ function bicycleModel () {
     setImmediate(() => cb(null, db[id]))
   }
 
-  function update (id, data, cb) {
-    if (!(db.hasOwnProperty(id))) {
+  function update(id, data, cb) {
+    if (!db.hasOwnProperty(id)) {
       const err = Error('not found')
       setImmediate(() => cb(err))
       return
@@ -51,8 +59,8 @@ function bicycleModel () {
     setImmediate(() => cb())
   }
 
-  function del (id, cb) {
-    if (!(db.hasOwnProperty(id))) {
+  function del(id, cb) {
+    if (!db.hasOwnProperty(id)) {
       const err = Error('not found')
       setImmediate(() => cb(err))
       return
@@ -60,6 +68,4 @@ function bicycleModel () {
     delete db[id]
     setImmediate(() => cb())
   }
-
 }
-

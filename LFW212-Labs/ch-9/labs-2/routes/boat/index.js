@@ -30,13 +30,11 @@ module.exports = async (fastify, opts) => {
 
   fastify.get('/:id', async (request, reply) => {
     const { id } = request.params
-    try { 
+    try {
       return await read(id)
-    } catch (err) { 
+    } catch (err) {
       if (err.message === 'not found') throw notFound()
       throw err
     }
   })
 }
-
-
