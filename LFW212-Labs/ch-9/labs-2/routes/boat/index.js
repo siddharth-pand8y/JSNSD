@@ -6,16 +6,41 @@ const read = promisify(boat.read)
 const create = promisify(boat.create)
 const del = promisify(boat.del)
 
+/** @type {import('fastify').FastifyPluginAsync<>} */
 module.exports = async (fastify, opts) => {
   const { notFound } = fastify.httpErrors
 
-  fastify.post('/', async (request, reply) => {
-    const { data } = request.body
-    const id = uid()
-    await create(id, data)
-    reply.code(201)
-    return { id }
-  })
+  fastify.post(
+    '/',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['data'],
+          additionalProperties: false,
+          properties: {
+            data: {
+              type: 'object',
+              required: ['brand', 'color'],
+              additionalProperties: false,
+              properties: {
+                brand: { type: 'string' },
+                color: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { data } = request.body
+      const id = uid()
+      await create(id, data)
+      reply.code(201)
+      return { id }
+    }
+  )
 
   fastify.delete('/:id', async (request, reply) => {
     const { id } = request.params

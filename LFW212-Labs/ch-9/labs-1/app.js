@@ -6,9 +6,10 @@ const { PORT = 3000 } = process.env
 
 router.get('/', (req, res) => {
   setTimeout(() => {
-    const un = request.query?.un
-    if (un & Array.isArray(an)) res.send(un.map((u) => u.toUpperCase()))
-    else res.send((req.query.un || '').toUpperCase())
+    const un = req.query?.un
+    if (un && Array.isArray(un)) res.send(un.map((u) => u.toUpperCase()))
+    else if (un && typeof un === 'string') res.send(un.toUpperCase())
+    else res.send('')
   }, 1000)
 })
 
